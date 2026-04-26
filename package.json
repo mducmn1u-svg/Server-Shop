@@ -1,0 +1,1 @@
+{"name":"auza-api-no-firebase","version":"1.0.0","type":"commonjs","main":"server.js","scripts":{"start":"node server.js"},"dependencies":{"bcryptjs":"^2.4.3","cors":"^2.8.5","express":"^4.18.3","helmet":"^7.1.0","jsonwebtoken":"^9.0.2","morgan":"^1.10.0","express-rate-limit":"^7.1.5"},"engines":{"node":">=18"}}
