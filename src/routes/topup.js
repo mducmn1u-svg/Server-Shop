@@ -1,0 +1,34 @@
+const express = require('express');
+const { z } = require('zod');
+const { db, admin } = require('../firebase');
+const { BANK, CARD_TYPES, CARD_AMOUNTS } = require('../config');
+const { makeBillCode } = require('../utils/helpers');
+const { requireAuth } = require('../middleware/auth');
+const router = express.Router();
+
+const bankSchema = z.object({ amount: z.number().int().min(10000).max(50000000) });
+const cardSchema = z.object({ cardType: z.enum(CARD_TYPES), amount: z.number().int().refine(v => CARD_AMOUNTS.includes(v), 'Invalid amount'), serial: z.string().min(4).max(80), pin: z.string().min(4).max(80) });
+
+router.get('/bank-info', (req, res) => res.json({ ok: true, bank: BANK }));
+
+router.post('/bank-bill', requireAuth, async (req, res, next) => {
+  try {
+    const { amount } = bankSchema.parse(req.body);
+    const code = makeBillCode(req.uid);
+    const id = db.ref('topups').push().key;
+    const bill = { uid: req.uid, realname: req.uid, method: 'bank', amount, bankName: BANK.name, accountNumber: BANK.account, accountName: BANK.owner, content: code, status: 'pending', timestamp: admin.database.ServerValue.TIMESTAMP };
+    await db.ref('topups/' + id).set(bill);
+    res.json({ ok: true, bill: { id, ...bill, qr: BANK.qr } });
+  } catch (err) { next(err); }
+});
+
+router.post('/card', requireAuth, async (req, res, next) => {
+  try {
+    const body = cardSchema.parse(req.body);
+    const id = db.ref('topups').push().key;
+    await db.ref('topups/' + id).set({ uid: req.uid, realname: req.uid, method: 'card', cardType: body.cardType, amount: body.amount, serial: body.serial.trim(), pin: body.pin.trim(), status: 'pending', timestamp: admin.database.ServerValue.TIMESTAMP });
+    res.json({ ok: true, id });
+  } catch (err) { next(err); }
+});
+
+module.exports = router;
