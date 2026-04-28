@@ -4,8 +4,9 @@
   "description": "Secure server API for random19k shop using Firebase Admin SDK",
   "main": "src/server.js",
   "type": "commonjs",
-  "scripts": {
-    "start": "node src/server.js",
+"scripts": {
+  "start": "node src/server.js"
+}
     "dev": "nodemon src/server.js"
   },
   "engines": {
