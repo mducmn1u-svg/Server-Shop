@@ -42,5 +42,8 @@ app.use('/api/admin', adminLimiter, requireAdminSecret, adminRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-const port = Number(process.env.PORT || 3000);
-app.listen(port, () => console.log('random19k API running on port ' + port));
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
